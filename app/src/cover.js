@@ -292,7 +292,26 @@ function fitLines(ctx, text, maxWidth, startSize) {
     if (best) return { size, lines: best };
     size -= 4;
   }
-  return { size, lines: [text] };
+  // Floor size reached: a single unbreakable word can still be wider than the
+  // poster, so truncate any such word with an ellipsis instead of letting the
+  // title run off the edge.
+  ctx.font = '12px Anton, \'Arial Narrow\', sans-serif';
+  const safeWords = words.map((w) => {
+    if (ctx.measureText(w).width <= maxWidth) return w;
+    let clipped = w;
+    while (clipped.length > 1 && ctx.measureText(`${clipped}…`).width > maxWidth) clipped = clipped.slice(0, -1);
+    return `${clipped}…`;
+  });
+  const safeText = safeWords.join(' ');
+  if (ctx.measureText(safeText).width <= maxWidth) return { size: 12, lines: [safeText] };
+  for (let cut = 1; cut < safeWords.length; cut++) {
+    const a = safeWords.slice(0, cut).join(' ');
+    const b = safeWords.slice(cut).join(' ');
+    if (ctx.measureText(a).width <= maxWidth && ctx.measureText(b).width <= maxWidth) return { size: 12, lines: [a, b] };
+  }
+  let line = safeText;
+  while (line.length > 1 && ctx.measureText(line).width > maxWidth) line = line.slice(0, -1);
+  return { size: 12, lines: [line.endsWith('…') ? line : `${line}…`] };
 }
 
 function drawCaption(ctx, w, h, state, grade) {
