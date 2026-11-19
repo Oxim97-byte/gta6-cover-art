@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sunset Strip — GTA-style Cover Studio</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">SUNSET STRIP</span>
+    <span class="brand-sub">GTA-style Cover Studio</span>
+  </div>
+  <div class="top-actions">
+    <span id="photoCount" class="photo-count">0/4 photos</span>
+    <button id="undo" type="button" disabled>Undo</button>
+    <button id="redo" type="button" disabled>Redo</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <aside class="rail" aria-label="Cover controls">
+    <section class="step">
+      <h2><span class="step-num">1</span> Photos</h2>
+      <label class="file-label">Add photos (up to 4)
+        <input id="photoInput" type="file" accept="image/*" multiple>
+      </label>
+      <button id="loadSamples" type="button" class="ghost">Load sample photos</button>
+      <p class="hint">Or drop image files onto the preview. Click a thumbnail to place it in the selected panel.</p>
+      <div id="photoStrip" class="photo-strip"></div>
+      <button id="fillAll" type="button" class="ghost">One photo in every panel</button>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-num">2</span> Layout</h2>
+      <div id="layoutPicker" class="layout-picker"></div>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-num">3</span> Grade</h2>
+      <div id="gradePicker" class="grade-picker"></div>
+      <label class="slider-row">Grade strength
+        <input id="gradeIntensity" type="range" min="0" max="100" value="80">
+      </label>
+      <label class="check-row"><input id="grainToggle" type="checkbox" checked> Film grain</label>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-num">4</span> Caption</h2>
+      <label>Title
+        <input id="captionInput" type="text" maxlength="48" value="SUNSET HEIST">
+      </label>
+      <label>Script subtitle
+        <input id="subtitleInput" type="text" maxlength="48" value="Vice City nights">
+      </label>
+      <label>Sub-caption
+        <input id="subcaptionInput" type="text" maxlength="60" value="A story in three acts">
+      </label>
+      <label>Badge ribbon
+        <input id="badgeInput" type="text" maxlength="24" value="★ EST. 2026 ★">
+      </label>
+      <label>Title fill
+        <select id="captionFill">
+          <option value="white">Warm white</option>
+          <option value="gradient">Grade gradient</option>
+        </select>
+      </label>
+      <label>Heat meter
+        <select id="heatInput">
+          <option value="0">No stars</option>
+          <option value="1">★</option>
+          <option value="2">★★</option>
+          <option value="3">★★★</option>
+          <option value="4">★★★★</option>
+          <option value="5" selected>★★★★★</option>
+        </select>
+      </label>
+      <label class="slider-row">Title size
+        <input id="captionScale" type="range" min="60" max="140" value="100">
+      </label>
+      <label class="slider-row">Title position ← →
+        <input id="captionX" type="range" min="15" max="85" value="50">
+      </label>
+      <label class="slider-row">Title position ↑ ↓
+        <input id="captionY" type="range" min="50" max="95" value="84">
+      </label>
+    </section>
+
+    <section class="step">
+      <h2><span class="step-num">5</span> Export</h2>
+      <div id="sizePicker" class="size-picker"></div>
+      <button id="exportOne" type="button" class="primary">Export PNG</button>
+      <button id="exportAll" type="button" class="ghost">Export all three sizes</button>
+      <p id="status" role="status" class="status"></p>
+    </section>
+  </aside>
+
+  <section class="stage" id="stage" aria-label="Cover preview">
+    <div class="canvas-wrap">
+      <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+    </div>
+    <div class="panel-bar">
+      <span id="panelInfo">Panel 1 of 1</span>
+      <label class="slider-row">Photo zoom
+        <input id="panelZoom" type="range" min="100" max="250" value="100">
+        <span id="zoomValue">100%</span>
+      </label>
+      <span class="hint">Click a panel to select it. Drag inside a panel to slide its photo.</span>
+    </div>
+  </section>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
