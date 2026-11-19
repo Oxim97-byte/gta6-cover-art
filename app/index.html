@@ -3,13 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#160a1e">
+<meta name="description" content="Sunset Strip — turn a photo and a caption into GTA 6 style cover art, right in the browser.">
 <title>Sunset Strip — GTA-style Cover Studio</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<a class="skip-link" href="#stage">Skip to cover preview</a>
 <header class="topbar">
   <div class="brand">
-    <span class="brand-mark">SUNSET STRIP</span>
+    <h1 class="brand-mark">SUNSET STRIP</h1>
     <span class="brand-sub">GTA-style Cover Studio</span>
   </div>
   <div class="top-actions">
@@ -49,16 +52,16 @@
     <section class="step">
       <h2><span class="step-num">4</span> Caption</h2>
       <label>Title
-        <input id="captionInput" type="text" maxlength="48" value="SUNSET HEIST">
+        <input id="captionInput" name="caption" autocomplete="off" type="text" maxlength="48" value="SUNSET HEIST">
       </label>
       <label>Script subtitle
-        <input id="subtitleInput" type="text" maxlength="48" value="Vice City nights">
+        <input id="subtitleInput" name="subtitle" autocomplete="off" type="text" maxlength="48" value="Vice City nights">
       </label>
       <label>Sub-caption
-        <input id="subcaptionInput" type="text" maxlength="60" value="A story in three acts">
+        <input id="subcaptionInput" name="subcaption" autocomplete="off" type="text" maxlength="60" value="A story in three acts">
       </label>
       <label>Badge ribbon
-        <input id="badgeInput" type="text" maxlength="24" value="★ EST. 2026 ★">
+        <input id="badgeInput" name="badge" autocomplete="off" type="text" maxlength="24" value="★ EST. 2026 ★">
       </label>
       <label>Title fill
         <select id="captionFill">
@@ -91,14 +94,14 @@
       <h2><span class="step-num">5</span> Export</h2>
       <div id="sizePicker" class="size-picker"></div>
       <button id="exportOne" type="button" class="primary">Export PNG</button>
-      <button id="exportAll" type="button" class="ghost">Export all three sizes</button>
+      <button id="exportAll" type="button" class="ghost">Export all 3 sizes</button>
       <p id="status" role="status" class="status"></p>
     </section>
   </aside>
 
-  <section class="stage" id="stage" aria-label="Cover preview">
+  <section class="stage" id="stage" aria-label="Cover preview" tabindex="-1">
     <div class="canvas-wrap">
-      <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+      <canvas id="cover" width="1080" height="1080" role="img" tabindex="0" aria-label="The cover"></canvas>
     </div>
     <div class="panel-bar">
       <span id="panelInfo">Panel 1 of 1</span>
@@ -106,7 +109,7 @@
         <input id="panelZoom" type="range" min="100" max="250" value="100">
         <span id="zoomValue">100%</span>
       </label>
-      <span class="hint">Click a panel to select it. Drag inside a panel to slide its photo.</span>
+      <span class="hint">Click a panel to select it. Drag inside a panel to slide its photo, or focus the cover and use arrow keys (1–9 switch panels).</span>
     </div>
   </section>
 </div>
