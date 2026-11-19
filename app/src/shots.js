@@ -15,6 +15,16 @@ export async function runShot(shot, query, api) {
     if (size.length === 2 && size[0] > 0 && size[1] > 0) api.setPreviewSize(size[0], size[1]);
   }
 
+  // The editor shot shows the multi-panel workflow: three different photos, one
+  // per panel, instead of the same photo repeated in every panel.
+  let panelPhoto;
+  if (shot === 'editor') {
+    await api.loadSamplePhoto('neon-street');
+    await api.loadSamplePhoto('rooftop-sunset');
+    await api.loadSamplePhoto('pier');
+    panelPhoto = [0, 1, 2, 0, 0, 0, 0, 0, 0];
+  }
+
   await api.loadSamplePhoto(photo);
   api.applyPatch({
     caption,
@@ -22,6 +32,7 @@ export async function runShot(shot, query, api) {
     grade,
     subtitle: query.get('subtitle') ?? 'Vice City nights',
     subcaption: query.get('subcaption') ?? 'A story in three acts',
+    ...(panelPhoto ? { panelPhoto } : {}),
   });
   await api.redrawWhenFontsReady();
   requestAnimationFrame(() => requestAnimationFrame(() => { window.__shotReady = true; }));
