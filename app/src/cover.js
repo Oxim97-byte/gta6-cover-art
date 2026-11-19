@@ -76,7 +76,9 @@ export function layoutPanels(layout, w, h) {
 
 // ---- procedural vector art -------------------------------------------------
 
-/** A synthwave sun: a gradient disc with horizontal slats cut out of its lower half. */
+/** A synthwave sun: a gradient disc with horizontal slats cut out of its lower half.
+ *  Drawn as a graphic sticker — dark outline ring + drop shadow — so it reads as
+ *  poster art, never as a second sky sun competing with the photo's own sun. */
 function drawSun(ctx, cx, cy, r, top, bottom) {
   const off = document.createElement('canvas');
   const pad = 4;
@@ -97,7 +99,20 @@ function drawSun(ctx, cx, cy, r, top, bottom) {
     y += th + r * 0.14;
     th += Math.max(1, r * 0.02);
   }
+  // sticker treatment: soft drop shadow, then the slatted disc, then a dark ring
+  ctx.save();
+  ctx.shadowColor = 'rgba(10,4,16,0.55)';
+  ctx.shadowBlur = Math.max(10, r * 0.18);
+  ctx.shadowOffsetY = Math.max(4, r * 0.06);
   ctx.drawImage(off, cx - off.width / 2, cy - off.height / 2);
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle = '#0D0512';
+  ctx.lineWidth = Math.max(3, r * 0.045);
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
 }
 
 /** A palm silhouette: curved trunk plus seven drooping fronds. */
@@ -132,7 +147,8 @@ function drawPalm(ctx, x, y, s, color, lean, rng) {
   ctx.restore();
 }
 
-/** A jagged skyline silhouette along the bottom of a rectangle. */
+/** A jagged skyline silhouette along the bottom of a rectangle, with a few lit
+ *  windows so it reads as a city at dusk instead of a black strip. */
 function drawSkyline(ctx, x, y, w, h, color, rng) {
   ctx.save();
   ctx.fillStyle = color;
@@ -142,6 +158,15 @@ function drawSkyline(ctx, x, y, w, h, color, rng) {
     const bh = h * (0.25 + rng() * 0.75);
     ctx.fillRect(bx, y + h - bh, bw, bh);
     if (rng() > 0.6) ctx.fillRect(bx + bw * 0.3, y + h - bh - h * 0.12, bw * 0.18, h * 0.12);
+    // lit windows: 1–3 tiny gold panes per building
+    ctx.fillStyle = 'rgba(255,201,60,0.85)';
+    const nw = 1 + Math.floor(rng() * 3);
+    for (let i = 0; i < nw; i++) {
+      const wx = bx + bw * (0.15 + rng() * 0.7);
+      const wy = y + h - bh + bh * (0.15 + rng() * 0.6);
+      ctx.fillRect(wx, wy, Math.max(2, bw * 0.08), Math.max(2, bh * 0.07));
+    }
+    ctx.fillStyle = color;
     bx += bw + w * 0.012;
   }
   ctx.restore();
@@ -325,6 +350,11 @@ function drawCaption(ctx, w, h, state, grade) {
     ctx.font = `${subSize}px Pacifico, cursive`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    // dark stroke first so the script stays readable over any photo
+    ctx.lineWidth = Math.max(2, subSize * 0.14);
+    ctx.strokeStyle = '#0D0512';
+    ctx.lineJoin = 'round';
+    ctx.strokeText(sub, cx, titleTop - subSize * 0.85);
     ctx.fillStyle = grade.accent;
     ctx.shadowColor = grade.accent;
     ctx.shadowBlur = subSize * 0.45;
@@ -338,8 +368,13 @@ function drawCaption(ctx, w, h, state, grade) {
     ctx.font = `600 ${scSize}px system-ui, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(255,246,236,0.92)';
+    // dark stroke so it reads on white snapshot frames as well as dark sky
+    ctx.lineWidth = Math.max(2, scSize * 0.18);
+    ctx.strokeStyle = '#0D0512';
+    ctx.lineJoin = 'round';
     try { ctx.letterSpacing = `${scSize * 0.32}px`; } catch { /* older canvas */ }
+    ctx.strokeText(subcap.toUpperCase(), cx, titleTop + totalH + scSize * 1.1);
+    ctx.fillStyle = 'rgba(255,246,236,0.92)';
     ctx.fillText(subcap.toUpperCase(), cx, titleTop + totalH + scSize * 1.1);
     ctx.restore();
   }
@@ -379,6 +414,11 @@ function drawHeat(ctx, w, h, state) {
   const y = h * 0.115; // under the badge ribbon, clear of the sun at top-right
   let stars = '';
   for (let i = 0; i < 5; i++) stars += i < state.heat ? '★' : '☆';
+  // dark stroke so the gold stars read on bright skies too
+  ctx.lineWidth = Math.max(2, size * 0.12);
+  ctx.strokeStyle = '#0D0512';
+  ctx.lineJoin = 'round';
+  ctx.strokeText(stars, w * 0.06, y);
   ctx.fillStyle = '#FFC93C';
   ctx.shadowColor = 'rgba(255,201,60,0.8)';
   ctx.shadowBlur = size * 0.4;
@@ -451,17 +491,17 @@ export function drawCover(canvas, state) {
     }
   });
 
-  // grade wash over everything
+  // grade wash over everything — stronger, so every panel shares one sunset
   const intensity = state.gradeIntensity ?? 0.8;
   if (intensity > 0) {
     const wash = ctx.createLinearGradient(0, 0, 0, h);
     grade.stops.forEach((c, i) => wash.addColorStop(i / (grade.stops.length - 1), c));
     ctx.save();
-    ctx.globalAlpha = intensity * 0.42;
+    ctx.globalAlpha = intensity * 0.48;
     ctx.globalCompositeOperation = 'overlay';
     ctx.fillStyle = wash;
     ctx.fillRect(0, 0, w, h);
-    ctx.globalAlpha = intensity * 0.3;
+    ctx.globalAlpha = intensity * 0.34;
     ctx.globalCompositeOperation = 'soft-light';
     ctx.fillRect(0, 0, w, h);
     ctx.restore();
@@ -476,13 +516,15 @@ export function drawCover(canvas, state) {
 
   // vector decoration over the whole poster
   const unit = Math.min(w, h);
-  drawSun(ctx, w * 0.87, h * 0.15, unit * 0.11, grade.sun[0], grade.sun[1]);
+  drawSun(ctx, w * 0.88, h * 0.13, unit * 0.10, grade.sun[0], grade.sun[1]);
   drawBirds(ctx, w, h, 'rgba(13,5,18,0.9)', rngFromSeed(seed + 7));
-  drawPalm(ctx, w * 0.03, h * 0.995, h * 0.24, 'rgba(13,5,18,0.92)', 0.3, rng);
-  drawPalm(ctx, w * 0.97, h * 0.995, h * 0.19, 'rgba(13,5,18,0.92)', -0.35, rng);
-  drawSkyline(ctx, 0, h * 0.955, w, h * 0.045, 'rgba(13,5,18,0.85)', rngFromSeed(seed + 23));
-  drawHalftone(ctx, w * 0.03, h * 0.62, w * 0.12, h * 0.14, grade.accent, 0.35);
-  drawHalftone(ctx, w * 0.85, h * 0.62, w * 0.12, h * 0.14, grade.accent, 0.35);
+  // palms sized by the poster's short side, so on tall covers their fronds stay
+  // in the bottom corners instead of crossing the title block
+  drawPalm(ctx, w * 0.03, h * 0.995, unit * 0.22, 'rgba(13,5,18,0.92)', 0.3, rng);
+  drawPalm(ctx, w * 0.97, h * 0.995, unit * 0.17, 'rgba(13,5,18,0.92)', -0.35, rng);
+  drawSkyline(ctx, 0, h * 0.94, w, h * 0.06, 'rgba(13,5,18,0.85)', rngFromSeed(seed + 23));
+  drawHalftone(ctx, w * 0.03, h * 0.62, w * 0.12, h * 0.14, grade.accent, 0.5);
+  drawHalftone(ctx, w * 0.85, h * 0.62, w * 0.12, h * 0.14, grade.accent, 0.5);
 
   // lettering
   drawBadge(ctx, w, h, state, grade);
