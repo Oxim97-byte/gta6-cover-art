@@ -28,6 +28,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
+html { color-scheme: dark; }
 body {
   background: var(--plum);
   color: var(--ink);
@@ -39,10 +40,14 @@ body {
 
 .topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 10px 18px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-left: max(18px, env(safe-area-inset-left));
+  padding-right: max(18px, env(safe-area-inset-right));
   background: var(--plum-2);
   border-bottom: 3px solid transparent;
   border-image: linear-gradient(90deg, var(--magenta), var(--orange) 55%, var(--gold)) 1;
@@ -52,7 +57,9 @@ body {
 .brand-mark {
   font-family: 'Anton', 'Arial Narrow', sans-serif;
   font-size: 26px;
+  font-weight: 400;
   letter-spacing: 1px;
+  margin: 0;
   background: linear-gradient(90deg, var(--magenta), var(--orange) 55%, var(--gold));
   -webkit-background-clip: text;
   background-clip: text;
@@ -78,6 +85,8 @@ button {
   color: var(--ink);
   cursor: pointer;
   border: 1px solid var(--line);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 button:hover:not(:disabled) { border-color: var(--magenta); }
 button:disabled { opacity: 0.4; cursor: default; }
@@ -116,6 +125,7 @@ button.active { outline: 2px solid var(--gold); outline-offset: 1px; }
   display: flex;
   align-items: center;
   gap: 8px;
+  text-wrap: balance;
 }
 .step-num {
   display: inline-flex;
@@ -147,7 +157,7 @@ button.active { outline: 2px solid var(--gold); outline-offset: 1px; }
   color: var(--ink);
   width: 100%;
 }
-.step input[type=text]:focus, .step select:focus, button:focus-visible, input[type=range]:focus-visible {
+.step input[type=text]:focus-visible, .step select:focus-visible, button:focus-visible, input[type=range]:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 1px;
 }
@@ -277,6 +287,8 @@ button.active { outline: 2px solid var(--gold); outline-offset: 1px; }
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
   cursor: grab;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   background: #000;
 }
 #cover:active { cursor: grabbing; }
@@ -290,8 +302,10 @@ button.active { outline: 2px solid var(--gold); outline-offset: 1px; }
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 8px 14px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   font-size: 13px;
 }
+.photo-count, #zoomValue, #panelInfo { font-variant-numeric: tabular-nums; }
 .panel-bar .slider-row { margin: 0; }
 .panel-bar input[type=range] { width: 140px; accent-color: var(--magenta); }
 
@@ -308,4 +322,30 @@ body.shot-cover #cover { width: 100vw; height: 100vh; max-width: none; max-heigh
   .workspace { flex-direction: column; }
   .rail { width: 100%; border-right: 0; border-bottom: 2px solid var(--line); order: 2; }
   .stage { order: 1; }
+}
+
+/* Skip link: visually hidden until keyboard focus. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--gold);
+  color: #160a1e;
+  padding: 10px 16px;
+  font-weight: 700;
+  z-index: 100;
+  border-radius: 0 0 6px 0;
+  text-decoration: none;
+}
+.skip-link:focus { left: 0; }
+
+/* Respect reduced-motion: the app has no CSS animation, this is a guard so
+ * nothing ever loops or slides for users who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
